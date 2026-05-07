@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef enum {
     ENCR_OK = 0,
@@ -12,7 +14,7 @@ typedef enum {
 
 } encr_result_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     char magic[4];
     uint8_t version;
 

@@ -1,52 +1,57 @@
+#define _POSIX_C_SOURCE 200809L
+
+#include "enser/decoder.h"
+#include "enser/encoder.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <endian.h>
+#include <time.h>
 
 int encr_decoder(
     const uint8_t *buffer,
     size_t buffer_size,
     encr_object_t *out
 ){
-    //Validar tamaño
+    memset(out, 0, sizeof(*out));
+
     if (buffer_size < sizeof(encr_header_t))
         return ENCR_ERR_SIZE;
 
-    // Leer header
-    const encr_header_t *hdr =
-    (const encr_header_t *)buffer;
+    encr_header_t hdr;
 
-    // Validar header
-    if (memcmp(hdr->magic, "ENSR", 4) != 0)
+    memcpy(&hdr, buffer, sizeof(hdr));
+
+    if (memcmp(hdr.magic, "ENCR", 4) != 0)
         return ENCR_ERR_MAGIC;
 
-    // Validar version
-    if (hdr->version != ENCR_VERSION)
+    if (hdr.version != ENCODER_VERSION)
         return ENCR_ERR_VERSION;
 
-    // Convertir endianess
     uint16_t refs_count =
-    ntohs(hdr->refs_count);
+        ntohs(hdr.refs_count);
 
     uint32_t payload_size =
-    ntohl(hdr->payload_size);
+        ntohl(hdr.payload_size);
 
     uint64_t timestamp =
-    be64toh(hdr->timestamp);
+        hdr.timestamp;
 
-    // Validar tamaños
+    (void)timestamp;
+
     size_t expected =
-    encoder_size(refs_count, payload_size);
+        sizeof(encr_header_t) + payload_size;
 
     if (expected != buffer_size)
         return ENCR_ERR_CORRUPTED;
 
-    // Reconstruir offsets
     const uint8_t *ptr =
-    buffer + sizeof(encr_header_t);
+        buffer + sizeof(encr_header_t);
 
-    // Copiar payload
     out->payload = malloc(payload_size);
+
+    if (!out->payload)
+        return ENCR_ERR_OVERFLOW;
 
     memcpy(
         out->payload,
@@ -54,10 +59,21 @@ int encr_decoder(
         payload_size
     );
 
-    // Copiar metadata util
-    out->header = *hdr;
+    out->header = hdr;
 
-    // Validacion de hash (futuro)
-    TODO:
-    recalculate hash(payload)
+    out->header.refs_count = refs_count;
+    out->header.payload_size = payload_size;
+
+    return ENCR_OK;
+}
+
+void encr_object_free(
+    encr_object_t *obj
+){
+    if (!obj)
+        return;
+
+    free(obj->payload);
+
+    obj->payload = NULL;
 }
