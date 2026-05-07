@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "enser/encoder.h"
+#include "enser/storage.h"
 
 void print_hash(uint8_t hash[32]) {
     for (int i = 0; i < 32; i++)
@@ -41,6 +43,7 @@ int main() {
 
     // Parse
 
+    /*
     encoder_view_t view;
 
     if (encoder_parse(buffer, size, &view) != 0) {
@@ -53,6 +56,29 @@ int main() {
     printf("  id : %u\n", view.hdr->id);
     printf("  refs_count: %u\n", view.refs_count);
     printf("  payload_size: %u\n", view.payload_size);
+
+    */
+    // store hash
+
+    char hash_hex[65];
+
+    for (int i = 0; i < 32; i++) {
+        sprintf(
+            &hash_hex[i * 2],
+            "%02x",
+            hash[i]
+        );
+    }
+
+    hash_hex[64] = '\0';
+
+    if (
+        enser_storage_write(
+            hash_hex,
+            buffer,
+            size
+        ) == 0
+    )
 
     free(buffer);
     return 0;
