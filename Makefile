@@ -1,7 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
 
-SRC = $(wildcard core/*.c) $(wildcard test/*.c)
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude
+
+SRC = $(wildcard src/core/*.c) \
+      $(wildcard src/lba/*.c) \
+      $(wildcard src/cli/*.c) \
+      $(wildcard tests/*.c)
+
 OBJ = $(SRC:.c=.o)
 
 BIN = bin/test
@@ -19,4 +24,5 @@ run: all
 	./$(BIN)
 
 clean:
-	rm -f core/*.o test/*.o $(BIN)
+	find src tests -name "*.o" -delete
+	rm -f $(BIN)

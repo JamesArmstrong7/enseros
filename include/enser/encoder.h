@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "hash.h"
+#include "enser/hash.h"
 
 #define ENCODER_MAGIC "ENCR"
 #define ENCODER_VERSION 1

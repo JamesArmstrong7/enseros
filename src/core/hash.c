@@ -1,5 +1,5 @@
-#include "hash.h"
 #include <string.h>
+#include "enser/hash.h"
 
 #define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
 #define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))

@@ -1,8 +1,8 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
-#include "encoder.h"
-#include "hash.h"
+#include "enser/encoder.h"
+#include "enser/hash.h"
 
 size_t encoder_size(uint16_t refs_count, uint32_t payload_size) {
     return sizeof(encoder_header_t)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../core/encoder.h"
+#include "enser/encoder.h"
 
 void print_hash(uint8_t hash[32]) {
     for (int i = 0; i < 32; i++)
