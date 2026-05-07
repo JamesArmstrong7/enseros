@@ -10,6 +10,16 @@ size_t encoder_size(uint16_t refs_count, uint32_t payload_size) {
         + payload_size;
 }
 
+uint64_t enser_timestamp_ms(void)
+{
+    struct timespec ts;
+
+    clock_gettime(CLOCK_REALTIME, &ts);
+
+    return ((uint64_t)ts.tv_sec * 1000ULL)
+         + ((uint64_t)ts.tv_nsec / 1000000ULL);
+}
+
 int encoder_build(
     uint8_t sys,
     uint8_t id,

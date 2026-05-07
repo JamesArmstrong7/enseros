@@ -19,6 +19,7 @@ typedef struct {
     uint8_t ix;     // INDEX CONTEXT SOURCE EVENT
     uint8_t ec;     // CONTRACT AND CONTROL EVENT 
 
+    uint64_t timestamp;
     uint16_t refs_count;
     uint32_t payload_size;
 } encoder_header_t;
@@ -68,5 +69,7 @@ int encoder_parse(
     size_t size,
     encoder_view_t *out
 );
+
+uint64_t enser_timestamp_ms(void);
 
 #endif
