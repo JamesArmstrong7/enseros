@@ -25,12 +25,12 @@ int main(int argc, char **argv) {
     }
     if (strcmp(argv[1], "create") == 0) {
 
-	if (encoder_buid(
+	if (encoder_build(
 	    1, 1, 1, 1,
 	    NULL, 0,
 	    NULL, 0,
 	    &buffer, &size
-	) != 0 {
+	) != 0){
 	    printf("build error\n");
 	    return 1;
 	}
