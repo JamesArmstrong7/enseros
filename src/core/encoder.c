@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "enser/encoder.h"
 #include "enser/hash.h"
 
@@ -50,6 +51,8 @@ int encoder_build(
     hdr->ix  = ix;
     hdr->ec  = ec;
 
+    hdr->timestamp = enser_timestamp_ms();
+
     hdr->refs_count = htons(refs_count);
     hdr->payload_size = htonl(payload_size);
 
@@ -80,7 +83,10 @@ int encoder_validate(const uint8_t *buffer, size_t size) {
     if (memcmp(hdr->magic, ENCODER_MAGIC, 4) != 0) return -2;
     if (hdr->version != ENCODER_VERSION) return -3;
 
-    size_t expected = encoder_size(hdr->refs_count, hdr->payload_size);
+    uint16_t refs_count = ntohs(hdr->refs_count);
+    uint32_t payload_size = ntohl(hdr->payload_size);
+
+    size_t expected = encoder_size(refs_count, payload_size);
 
     if (expected != size) return -4;
 

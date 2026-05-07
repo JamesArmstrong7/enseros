@@ -17,7 +17,7 @@ int enser_storage_path(
     return snprintf(
         out,
         out_size,
-        "storage/%.2s/%.2s/%s.bin",
+        "storage/%.2s/%.2s/%s",
         hash,
         hash + 2,
         hash
