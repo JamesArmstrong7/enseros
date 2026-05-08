@@ -37,7 +37,7 @@ int encr_decoder(
         ntohl(hdr.payload_size);
 
     uint64_t timestamp =
-    be64toh(hdr.timestamp);
+      enser_be64toh(hdr.timestamp);
 
     (void)timestamp;
 

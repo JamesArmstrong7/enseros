@@ -1,4 +1,5 @@
-*.o
 bin/
-build/
 storage/
+*.o
+timestamp
+log.txt

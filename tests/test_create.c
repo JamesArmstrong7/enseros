@@ -4,7 +4,7 @@
 
 #include "enser/encoder.h"
 #include "enser/storage.h"
-
+#include "enser/hex.h"
 
 int test_create(void) {
     uint8_t *buffer = NULL;

@@ -10,6 +10,20 @@
 
 #define ENCR_HASH_SIZE 32
 
+#include <arpa/inet.h>
+
+static inline uint64_t enser_htobe64(uint64_t host)
+{
+    return ((uint64_t)htonl(host & 0xFFFFFFFFULL) << 32)
+         | htonl(host >> 32);
+}
+
+static inline uint64_t enser_be64toh(uint64_t net)
+{
+    return ((uint64_t)ntohl(net & 0xFFFFFFFFULL) << 32)
+         | ntohl(net >> 32);
+}
+
 typedef enum {
 
     ENCR_OK = 0,

@@ -1,6 +1,4 @@
 #include <arpa/inet.h>
-#include <endian.h>
-
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -77,7 +75,7 @@ int encr_build(
         htonl(payload_size);
 
     hdr->timestamp =
-        htobe64(
+        enser_htobe64(
             enser_timestamp_ms()
         );
 
