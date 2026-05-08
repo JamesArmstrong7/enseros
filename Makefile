@@ -1,14 +1,25 @@
 CC = gcc
 
-CFLAGS = -D_POSIX_C_SOURCE=200809L \
-	 -Wall -Wextra -std=c11 -Iinclude
+CFLAGS = \
+	-D_POSIX_C_SOURCE=200809L \
+	-Wall \
+	-Wextra \
+	-std=c11 \
+	-Iinclude
 
-SRC = $(wildcard src/core/*.c) \
-      $(wildcard src/lba/*.c) \
-      $(wildcard src/cli/*.c) \
-      $(wildcard tests/*.c)
+LIB_SRC = \
+	$(wildcard src/core/*.c) \
+	$(wildcard src/lba/*.c)
 
-OBJ = $(SRC:.c=.o)
+TEST_SRC = \
+	$(wildcard tests/*.c)
+
+SRC = \
+	$(LIB_SRC) \
+	$(TEST_SRC)
+
+OBJ = \
+	$(SRC:.c=.o)
 
 BIN = bin/test
 
@@ -26,4 +37,6 @@ run: all
 
 clean:
 	find src tests -name "*.o" -delete
-	rm -f $(BIN)
+	rm -rf bin storage
+
+.PHONY: all run clean

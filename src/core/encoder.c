@@ -1,13 +1,19 @@
 #include <arpa/inet.h>
+#include <endian.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #include "enser/encoder.h"
 #include "enser/hash.h"
 
-size_t encoder_size(uint16_t refs_count, uint32_t payload_size) {
-    return sizeof(encoder_header_t)
-        + (size_t)refs_count * ENCODER_HASH_SIZE
+size_t encr_size(
+    uint16_t refs_count,
+    uint32_t payload_size
+){
+    return sizeof(encr_header_t)
+        + ((size_t)refs_count * ENCR_HASH_SIZE)
         + payload_size;
 }
 
@@ -15,122 +21,179 @@ uint64_t enser_timestamp_ms(void)
 {
     struct timespec ts;
 
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(
+        CLOCK_REALTIME,
+        &ts
+    );
 
     return ((uint64_t)ts.tv_sec * 1000ULL)
          + ((uint64_t)ts.tv_nsec / 1000000ULL);
 }
 
-int encoder_build(
-    uint8_t sys,
-    uint8_t id,
-    uint8_t ix,
-    uint8_t ec,
+int encr_build(
     const uint8_t **refs,
     uint16_t refs_count,
     const uint8_t *payload,
     uint32_t payload_size,
     uint8_t **out_buffer,
     size_t *out_size
-) {
-    if (!out_buffer || !out_size) return -1;
-    if (refs_count > 0 && !refs) return -2;
+){
+    if (!out_buffer || !out_size)
+        return -1;
 
-    size_t total = encoder_size(refs_count, payload_size);
+    if (refs_count > 0 && !refs)
+        return -2;
 
-    uint8_t *buf = malloc(total);
-    if (!buf) return -3;
+    size_t total =
+        encr_size(
+            refs_count,
+            payload_size
+        );
 
-    encoder_header_t *hdr = (encoder_header_t *)buf;
+    uint8_t *buf =
+        malloc(total);
 
-    memcpy(hdr->magic, ENCODER_MAGIC, 4);
-    hdr->version = ENCODER_VERSION;
+    if (!buf)
+        return -3;
 
-    hdr->sys = sys;
-    hdr->id  = id;
-    hdr->ix  = ix;
-    hdr->ec  = ec;
+    memset(buf, 0, total);
 
-    hdr->timestamp = enser_timestamp_ms();
+    encr_header_t *hdr =
+        (encr_header_t *)buf;
 
-    hdr->refs_count = htons(refs_count);
-    hdr->payload_size = htonl(payload_size);
+    memcpy(
+        hdr->magic,
+        ENCR_MAGIC,
+        4
+    );
 
-    uint8_t *ptr = buf + sizeof(encoder_header_t);
+    hdr->version =
+        ENCR_VERSION;
 
-    // refs
-    for (uint16_t i = 0; i < refs_count; i++) {
-        memcpy(ptr, refs[i], ENCODER_HASH_SIZE);
-        ptr += ENCODER_HASH_SIZE;
+    hdr->refs_count =
+        htons(refs_count);
+
+    hdr->payload_size =
+        htonl(payload_size);
+
+    hdr->timestamp =
+        htobe64(
+            enser_timestamp_ms()
+        );
+
+    /*
+     * hash(payload)
+     */
+    if (payload_size > 0 && payload){
+        hash_sha256(
+            payload,
+            payload_size,
+            hdr->hash
+        );
     }
 
-    // payload
-    if (payload_size > 0 && payload) {
-        memcpy(ptr, payload, payload_size);
+    uint8_t *ptr =
+        buf + sizeof(encr_header_t);
+
+    /*
+     * refs
+     */
+    for (
+        uint16_t i = 0;
+        i < refs_count;
+        i++
+    ){
+        memcpy(
+            ptr,
+            refs[i],
+            ENCR_HASH_SIZE
+        );
+
+        ptr += ENCR_HASH_SIZE;
+    }
+
+    /*
+     * payload
+     */
+    if (payload_size > 0 && payload){
+        memcpy(
+            ptr,
+            payload,
+            payload_size
+        );
     }
 
     *out_buffer = buf;
     *out_size = total;
 
-    return 0;
+    return ENCR_OK;
 }
 
-int encoder_validate(const uint8_t *buffer, size_t size) {
-    if (!buffer || size < sizeof(encoder_header_t)) return -1;
+int encr_validate(
+    const uint8_t *buffer,
+    size_t size
+){
+    if (
+        !buffer ||
+        size < sizeof(encr_header_t)
+    ){
+        return ENCR_ERR_SIZE;
+    }
 
-    const encoder_header_t *hdr = (const encoder_header_t *)buffer;
+    encr_header_t hdr;
 
-    if (memcmp(hdr->magic, ENCODER_MAGIC, 4) != 0) return -2;
-    if (hdr->version != ENCODER_VERSION) return -3;
+    memcpy(
+        &hdr,
+        buffer,
+        sizeof(hdr)
+    );
 
-    uint16_t refs_count = ntohs(hdr->refs_count);
-    uint32_t payload_size = ntohl(hdr->payload_size);
+    if (
+        memcmp(
+            hdr.magic,
+            ENCR_MAGIC,
+            4
+        ) != 0
+    ){
+        return ENCR_ERR_MAGIC;
+    }
 
-    size_t expected = encoder_size(refs_count, payload_size);
+    if (
+        hdr.version != ENCR_VERSION
+    ){
+        return ENCR_ERR_VERSION;
+    }
 
-    if (expected != size) return -4;
+    uint16_t refs_count =
+        ntohs(hdr.refs_count);
 
-    return 0;
+    uint32_t payload_size =
+        ntohl(hdr.payload_size);
+
+    size_t expected =
+        encr_size(
+            refs_count,
+            payload_size
+        );
+
+    if (expected != size){
+        return ENCR_ERR_CORRUPTED;
+    }
+
+    return ENCR_OK;
 }
 
-int encoder_hash(
+int encr_hash(
     const uint8_t *buffer,
     size_t size,
-    uint8_t out[ENCODER_HASH_SIZE]
-) {
-    if (!buffer || !out) return -1;
-    return hash_sha256(buffer, size, out);
-}
+    uint8_t out[ENCR_HASH_SIZE]
+){
+    if (!buffer || !out)
+        return -1;
 
-int encoder_parse(
-    const uint8_t *buffer,
-    size_t size,
-    encoder_view_t *out
-) {
-    if (!buffer || !out) return -1;
-
-    // reutiliza tu validate
-    if (encoder_validate(buffer, size) != 0) return -2;
-
-    const encoder_header_t *hdr = (const encoder_header_t *)buffer;
-
-    // ⚠️ si aún no aplicas hton/ntoh, usa directo
-    uint16_t refs_count = hdr->refs_count;
-    uint32_t payload_size = hdr->payload_size;
-
-    const uint8_t *ptr = buffer + sizeof(encoder_header_t);
-
-    const uint8_t *refs = ptr;
-    ptr += (size_t)refs_count * ENCODER_HASH_SIZE;
-
-    const uint8_t *payload = ptr;
-
-    // llenar vista
-    out->hdr = hdr;
-    out->refs = refs;
-    out->payload = payload;
-    out->refs_count = refs_count;
-    out->payload_size = payload_size;
-
-    return 0;
+    return hash_sha256(
+        buffer,
+        size,
+        out
+    );
 }

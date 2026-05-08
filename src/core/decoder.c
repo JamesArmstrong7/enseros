@@ -6,13 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include <time.h>
 
 int encr_decoder(
     const uint8_t *buffer,
     size_t buffer_size,
     encr_object_t *out
 ){
+    if (!buffer || !out)
+    return ENCR_ERR_CORRUPTED;
+
     memset(out, 0, sizeof(*out));
 
     if (buffer_size < sizeof(encr_header_t))
@@ -25,7 +27,7 @@ int encr_decoder(
     if (memcmp(hdr.magic, "ENCR", 4) != 0)
         return ENCR_ERR_MAGIC;
 
-    if (hdr.version != ENCODER_VERSION)
+    if (hdr.version != ENCR_VERSION)
         return ENCR_ERR_VERSION;
 
     uint16_t refs_count =
@@ -35,22 +37,33 @@ int encr_decoder(
         ntohl(hdr.payload_size);
 
     uint64_t timestamp =
-        hdr.timestamp;
+    be64toh(hdr.timestamp);
 
     (void)timestamp;
 
-    size_t expected =
-        sizeof(encr_header_t) + payload_size;
+    size_t expected = encr_size
+        (
+            refs_count,
+            payload_size
+        );
 
-    if (expected != buffer_size)
+    if (expected != buffer_size){
         return ENCR_ERR_CORRUPTED;
+    }
 
     const uint8_t *ptr =
         buffer + sizeof(encr_header_t);
 
+     /*
+      * TODO:
+      * advance refs section
+      * before payload parsing.
+      */
+
     out->payload = malloc(payload_size);
 
-    if (!out->payload)
+    if (payload_size > 0 &&
+        !out->payload)
         return ENCR_ERR_OVERFLOW;
 
     memcpy(
@@ -59,7 +72,22 @@ int encr_decoder(
         payload_size
     );
 
-    out->header = hdr;
+    memcpy(
+        out->header.magic,
+        hdr.magic,
+        4
+    );
+
+    out->header.version = hdr.version;
+    out->header.refs_count = refs_count;
+    out->header.payload_size = payload_size;
+    out->header.timestamp = timestamp;
+
+    memcpy(
+        out->header.hash,
+        hdr.hash,
+        32
+    );
 
     out->header.refs_count = refs_count;
     out->header.payload_size = payload_size;
