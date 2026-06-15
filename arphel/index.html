@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viquom - Arphel MVP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="arphel-container">
+        <!-- Zona Izquierda: Navegación Global (Mínima) -->
+        <nav class="navbar">
+            <div class="nav-brand">Viquom</div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Inicio</a>
+                <a href="#" class="nav-link">Buscar</a>
+            </div>
+        </nav>
+
+        <!-- Zona Central: Área Principal (Arphel - Escritorio de Retorno) -->
+        <main class="main-area">
+            <header class="page-header">
+                <h1>Tu Escritorio de Retorno</h1>
+                <p>Retoma donde dejaste sin perder contexto</p>
+                <button class="btn-primary btn-new-project" id="btn-new-project">
+                    + Nuevo Proyecto
+                </button>
+            </header>
+
+            <section class="projects-grid" id="projects-grid">
+                <!-- Las tarjetas de proyectos se insertarán aquí dinámicamente -->
+                <div class="empty-state">
+                    <h3>¡Comienza tu primer proyecto!</h3>
+                    <p>Agrega un proyecto para ver tu escritorio de retorno.</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- Zona Derecha: Panel Operativo Persistente (Versión Mínima) -->
+        <aside class="sidebar">
+            <section class="sidebar-section">
+                <h3>Taller</h3>
+                <button class="btn-sidebar" id="btn-new-project-sidebar">
+                    + Nuevo Proyecto
+                </button>
+            </section>
+
+            <section class="sidebar-section">
+                <h3>Escritorio</h3>
+                <div class="quick-access" id="quick-access">
+                    <!-- Accesos rápidos se mostrarán aquí -->
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Modal para Nuevo Proyecto -->
+    <div class="modal" id="new-project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Proyecto</h2>
+                <button class="btn-close" id="btn-close-modal">&times;</button>
+            </div>
+            <form id="new-project-form">
+                <div class="form-group">
+                    <label for="project-name">Nombre del Proyecto</label>
+                    <input type="text" id="project-name" placeholder="Ej: Aprendizaje de Python" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-type">Tipo</label>
+                    <select id="project-type" required>
+                        <option value="">Selecciona un tipo</option>
+                        <option value="codigo">Código / Programación</option>
+                        <option value="texto">Escritura / Documentación</option>
+                        <option value="diseno">Diseño / Arte</option>
+                        <option value="aprendizaje">Aprendizaje / Estudio</option>
+                        <option value="negocio">Negocio / Emprendimiento</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="project-path">Ubicación (Carpeta o Archivo)</label>
+                    <input type="text" id="project-path" placeholder="/home/developer/proyectos/mi-proyecto">
+                </div>
+                <div class="form-group">
+                    <label for="initial-context">¿Por qué empezaste esto? (Opcional)</label>
+                    <textarea id="initial-context" rows="3" placeholder="Qué te motivó a comenzar este proyecto..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="btn-cancel-project">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Proyecto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Contexto de Retorno -->
+    <div class="modal" id="edit-context-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Actualizar Contexto de Retorno</h2>
+                <button class="btn-close" id="btn-close-context-modal">&times;</button>
+            </div>
+            <form id="edit-context-form">
+                <input type="hidden" id="edit-project-id">
+                <div class="form-group">
+                    <label for="edit-en-que-estaba">¿En qué estaba?</label>
+                    <textarea id="edit-en-que-estaba" rows="2" placeholder="Qué estaba intentando lograr en esta última sesión..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-porque-pauso">¿Por qué lo pausé?</label>
+                    <textarea id="edit-porque-pauso" rows="2" placeholder="Motivo de la interrupción (trabajo,疲惫, otra prioridad)..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-al-volver">¿Qué quiero lograr al volver?</label>
+                    <textarea id="edit-al-volver" rows="2" placeholder="Objetivo específico para el próximo retorno..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-proximo-paso">¿Qué debería intentar primero?</label>
+                    <textarea id="edit-proximo-paso" rows="2" placeholder="Próximo paso lógico o recordatorio clave..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="btn-cancel-context">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Contexto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
