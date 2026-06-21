@@ -1,0 +1,10 @@
+[2026-06-19 23:00:00] Starting Batch 1: Cleanup Duplicate Test Files
+[2026-06-19 23:00:01] Identified duplicate test files: test_create2.c, test_create3.c, test_create4.c, test_create5.c
+[2026-06-19 23:00:02] Reason: These files cause multiple definition of `test_create` and `main` during linking, blocking compilation.
+[2026-06-19 23:00:03] Action: Deleting duplicate test files.
+[2026-06-19 23:00:04] Deleted: tests/test_create2.c
+[2026-06-19 23:00:04] Deleted: tests/test_create3.c
+[2026-06-19 23:00:05] Deleted: tests/test_create4.c
+[2026-06-19 23:00:05] Deleted: tests/test_create5.c
+[2026-06-19 23:00:06] Kept canonical test files: test_create.c, test_parse.c, test_view.c
+[2026-06-19 23:00:07] Batch 1 cleanup completed successfully.

@@ -31,6 +31,4 @@ int encr_hash(
     uint8_t out[ENCR_HASH_SIZE]
 );
 
-uint64_t enser_timestamp_ms(void);
-
 #endif

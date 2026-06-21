@@ -121,7 +121,7 @@ int test_view(
     printf(
         "timestamp: %llu\n",
         (unsigned long long)
-        obj.header.timestamp
+        obj.header.causal_seq
     );
 
     printf("\nhash: ");

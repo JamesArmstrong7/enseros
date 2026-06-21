@@ -71,7 +71,7 @@ int test_create(void) {
     hash_hex[64] = '\0';
 
     if (
-        ensor_storage_write(
+        enser_storage_write(
             hash_hex,
             buffer,
             size

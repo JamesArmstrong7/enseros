@@ -36,10 +36,10 @@ int encr_decoder(
     uint32_t payload_size =
         ntohl(hdr.payload_size);
 
-    uint64_t causal_seq =
-      enser_be64toh(hdr.causal_seq);
+    uint64_t timestamp =
+      enser_be64toh(hdr.timestamp);
 
-    (void)causal_seq;
+    (void)timestamp;
 
     size_t expected = encr_size
         (
@@ -51,8 +51,14 @@ int encr_decoder(
         return ENCR_ERR_CORRUPTED;
     }
 
-    const uint8_t *ptr = buffer + sizeof(encr_header_t) + (refs_count * ENCR_HASH_SIZE);
+    const uint8_t *ptr =
+        buffer + sizeof(encr_header_t);
 
+     /*
+      * TODO:
+      * advance refs section
+      * before payload parsing.
+      */
 
     out->payload = malloc(payload_size);
 
@@ -75,7 +81,7 @@ int encr_decoder(
     out->header.version = hdr.version;
     out->header.refs_count = refs_count;
     out->header.payload_size = payload_size;
-    out->header.causal_seq = causal_seq;
+    out->header.timestamp = timestamp;
 
     memcpy(
         out->header.hash,

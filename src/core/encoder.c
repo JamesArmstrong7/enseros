@@ -1,10 +1,10 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "enser/encoder.h"
 #include "enser/hash.h"
+#include "enser/causal_sequencer.h"
 
 size_t encr_size(
     uint16_t refs_count,
@@ -13,19 +13,6 @@ size_t encr_size(
     return sizeof(encr_header_t)
         + ((size_t)refs_count * ENCR_HASH_SIZE)
         + payload_size;
-}
-
-uint64_t enser_timestamp_ms(void)
-{
-    struct timespec ts;
-
-    clock_gettime(
-        CLOCK_REALTIME,
-        &ts
-    );
-
-    return ((uint64_t)ts.tv_sec * 1000ULL)
-         + ((uint64_t)ts.tv_nsec / 1000000ULL);
 }
 
 int encr_build(
@@ -74,10 +61,9 @@ int encr_build(
     hdr->payload_size =
         htonl(payload_size);
 
-    hdr->timestamp =
-        enser_htobe64(
-            enser_timestamp_ms()
-        );
+    /* Get next causal sequence */
+    uint64_t seq = caser_get_next();
+    hdr->causal_seq = enser_htobe64(seq);
 
     /*
      * hash(payload)
