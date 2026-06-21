@@ -4,16 +4,27 @@ CFLAGS = \
 	-D_POSIX_C_SOURCE=200809L \
 	-Wall \
 	-Wextra \
+	-Werror \
+	-pedantic \
 	-std=c11 \
 	-Iinclude
 
 LIB_SRC = \
 	$(wildcard src/core/*.c) \
 	$(wildcard src/causal_sequencer/*.c) \
-	$(wildcard src/persistence_log/*.c)
+	$(wildcard src/persistence_log/*.c) \
+	$(wildcard src/lba/*.c) \
+	$(wildcard src/iyunux/*.c) \
+	$(wildcard src/pipo/*.c) \
+	$(wildcard src/cromo/*.c) \
+	$(wildcard src/teddy/*.c) \
+	$(wildcard src/cnux/*.c)
 
 TEST_SRC = \
-	$(wildcard tests/*.c)
+	tests/main.c \
+	tests/test_create.c \
+	tests/test_parse.c \
+	tests/test_view.c
 
 LOG_TEST_SRC = tests/test_log.c
 
@@ -50,6 +61,6 @@ run: all
 
 clean:
 	find src tests -name "*.o" -delete
-	rm -rf bin storage
+	rm -rf bin storage lba.jsonl lba
 
 .PHONY: all run clean

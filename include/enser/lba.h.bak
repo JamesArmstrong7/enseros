@@ -67,8 +67,6 @@ lba_event_t *lba_get_latest_event(const char *entity_id);
  */
 void lba_event_free(lba_event_t *event);
 
-void lba_deinit(void);
-
 #ifdef __cplusplus
 }
 #endif

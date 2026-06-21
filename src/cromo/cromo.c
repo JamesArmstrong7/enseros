@@ -23,7 +23,6 @@ int cromo_process_intent(const char *intent, const char *current_state,
 
     // We will create an array of operations (for now, just one).
     const char *operation = intent;
-    size_t operation_count = 1;
 
     // Step 2: Synthesize a single transaction event.
     lba_event_t *event = malloc(sizeof(lba_event_t));
@@ -47,40 +46,34 @@ int cromo_process_intent(const char *intent, const char *current_state,
     // Set timestamp
     event->timestamp = timestamp;
 
-    // Create the payload: a JSON array of operations.
-    // We will create a string like "[\"operation1\",\"operation2\",...]"
-    // For now, we have one operation.
-    // We will need to escape the operation string if it contains quotes or special characters.
-    // For simplicity, we assume the operation string does not contain quotes, backslashes, or newlines.
-    // We will allocate enough space for: "[" + quote + operation + quote + "]" for each operation, plus commas.
-    size_t payload_len = 2; // for the brackets
-    for (size_t i = 0; i < operation_count; i++) {
-        payload_len += 2; // for the quotes around the operation
-        payload_len += strlen(operation); // the operation itself
-        if (i < operation_count - 1) {
-            payload_len += 1; // for the comma
+    // Create the payload: a JSON string.
+    // We need to escape quotes and backslashes in the operation.
+    size_t payload_len = 2; // for the surrounding quotes
+    for (size_t i = 0; operation[i]; i++) {
+        if (operation[i] == '"' || operation[i] == '\\') {
+            payload_len++; // escape character
         }
+        payload_len++;
     }
     char *payload = malloc(payload_len + 1); // +1 for null terminator
     if (!payload) {
         free(event);
         return -1;
     }
-    payload[0] = '[';
+    payload[0] = '"';
     size_t pos = 1;
-    for (size_t i = 0; i < operation_count; i++) {
-        payload[pos++] = '"';
-        // Copy the operation string
-        const char *op = operation; // since we have only one operation
-        size_t op_len = strlen(op);
-        memcpy(&payload[pos], op, op_len);
-        pos += op_len;
-        payload[pos++] = '"';
-        if (i < operation_count - 1) {
-            payload[pos++] = ',';
+    for (size_t i = 0; operation[i]; i++) {
+        if (operation[i] == '"') {
+            payload[pos++] = '\\';
+            payload[pos++] = '"';
+        } else if (operation[i] == '\\') {
+            payload[pos++] = '\\';
+            payload[pos++] = '\\';
+        } else {
+            payload[pos++] = operation[i];
         }
     }
-    payload[pos] = ']';
+    payload[pos] = '"';
     payload[pos+1] = '\0';
 
     event->data = payload;

@@ -11,6 +11,11 @@
 static const char *log_file_path = NULL;
 static FILE *log_fp = NULL;
 
+// Forward declarations for PIPO handlers
+static int lba_pipo_handle_local(const void *request, void **response);
+static int lba_pipo_escalate(const void *request);
+static int lba_pipo_handle_daemon_response(const void *daemon_response, void **response);
+
 int lba_init(const char *log_dir) {
     if (log_dir) {
         // Ensure log directory exists
@@ -468,11 +473,6 @@ void lba_event_free(lba_event_t *event) {
     free(event);
 }
 
-// Forward declarations for PIPO handlers
-static int lba_pipo_handle_local(const void *request, void **response);
-static int lba_pipo_escalate(const void *request);
-static int lba_pipo_handle_daemon_response(const void *daemon_response, void **response);
-
 // PIPO interface for LBA module
 static const pipo_interface_t lba_pipo_interface = {
     .handle_local = lba_pipo_handle_local,
@@ -548,9 +548,4 @@ int lba_pipo_init(const char *log_dir) {
         return ret;
     }
     return pipo_init(&lba_pipo_interface);
-}
-
-void lba_pipo_deinit(void) {
-    pipo_deinit();
-    lba_deinit();
 }

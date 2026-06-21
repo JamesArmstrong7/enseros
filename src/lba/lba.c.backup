@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-#include "enser/pipo.h"
 
 static const char *log_file_path = NULL;
 static FILE *log_fp = NULL;
@@ -466,91 +465,4 @@ void lba_event_free(lba_event_t *event) {
     }
     free(event->data);
     free(event);
-}
-
-// Forward declarations for PIPO handlers
-static int lba_pipo_handle_local(const void *request, void **response);
-static int lba_pipo_escalate(const void *request);
-static int lba_pipo_handle_daemon_response(const void *daemon_response, void **response);
-
-// PIPO interface for LBA module
-static const pipo_interface_t lba_pipo_interface = {
-    .handle_local = lba_pipo_handle_local,
-    .escalate = lba_pipo_escalate,
-    .handle_daemon_response = lba_pipo_handle_daemon_response
-};
-
-static int lba_pipo_handle_local(const void *request, void **response) {
-    if (!request || !response) {
-        return -1;
-    }
-    const lba_event_t *event = request;
-    lba_event_t *event_copy = malloc(sizeof(lba_event_t));
-    if (!event_copy) {
-        return -1;
-    }
-    // Initialize the copy
-    event_copy->event_id[0] = 0;
-    event_copy->event_type[0] = 0;
-    event_copy->timestamp = event->timestamp;
-    event_copy->data = NULL;
-    event_copy->version = event->version;
-
-    // Copy event_id (array, so always copy)
-    strncpy(event_copy->event_id, event->event_id, sizeof(event_copy->event_id)-1);
-    event_copy->event_id[sizeof(event_copy->event_id)-1] = 0;
-
-    // Copy event_type (array)
-    strncpy(event_copy->event_type, event->event_type, sizeof(event_copy->event_type)-1);
-    event_copy->event_type[sizeof(event_copy->event_type)-1] = 0;
-
-    // Copy data if present
-    if (event->data) {
-        event_copy->data = strdup(event->data);
-        if (!event_copy->data) {
-            free(event_copy);
-            return -1;
-        }
-    }
-
-    int ret = lba_append(event_copy);
-    // Clean up the copy's data (since lba_append makes its own copy)
-    free(event_copy->data);
-    free(event_copy);
-    if (ret != 0) {
-        int *fail = malloc(sizeof(int));
-        if (!fail) return -1;
-        *fail = -1;
-        *response = fail;
-        return -1;
-    }
-    int *success = malloc(sizeof(int));
-    if (!success) return -1;
-    *success = 0;
-    *response = success;
-    return 0;
-}
-
-static int lba_pipo_escalate(const void *request) {
-    (void)request;
-    return -1; // Not implemented; all handling done locally for now
-}
-
-static int lba_pipo_handle_daemon_response(const void *daemon_response, void **response) {
-    (void)daemon_response;
-    (void)response;
-    return -1; // Not implemented
-}
-
-int lba_pipo_init(const char *log_dir) {
-    int ret = lba_init(log_dir);
-    if (ret != 0) {
-        return ret;
-    }
-    return pipo_init(&lba_pipo_interface);
-}
-
-void lba_pipo_deinit(void) {
-    pipo_deinit();
-    lba_deinit();
 }

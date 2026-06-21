@@ -37,7 +37,6 @@ OBJ = \
 	$(SRC:.c=.o)
 
 LOG_TEST_OBJ = \
-	$(LIB_SRC:.c=.o) \
 	$(LOG_TEST_SRC:.c=.o)
 
 BIN = bin/test

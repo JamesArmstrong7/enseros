@@ -54,6 +54,12 @@ int main(
         return test_view(argv[2]);
     }
 
+    if (
+        strcmp(argv[1], "test_integrate") == 0
+    ){
+        return test_integrate();
+    }
+
     usage(argv[0]);
 
     return 1;
