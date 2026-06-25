@@ -1,3 +1,6 @@
+/* © 2026 Juan Sebastian Alarcón Alarcón (@JamesArmstrong7). Prohibida su
+copia, ingeniería inversa o estudio funcional. Ley 23 de 1982. */
+
 #define _POSIX_C_SOURCE 200809L
 
 #include "enser/decoder.h"
