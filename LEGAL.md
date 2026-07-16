@@ -23,7 +23,7 @@ algoritmos.
 *   Cualquier intento de ingeniería inversa, descompilación o desmontaje.
 
 Cualquier sistema, protocolo o software derivado que imite sustancialmente la
-lógica operativa o la estructura de comportamiento de **ENSER** sin la
+lógica operativa o la estructura de comportamiento de **enseros** sin la
 autorización expresa, manual y por escrito de Juan Sebastian Alarcón Alarcón
 será considerado una infracción directa por transformación no autorizada y
 plagio de arquitectura de software bajo la **Ley 23 de 1982 y la Decisión
